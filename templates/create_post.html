@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %} posts-page {% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <h5 class="card-header">Add Post for {{ user.first_name}} {{user.last_name}}</h5>
+    <div class="card-body">
+        <form method="post">
+            <p>Title</p>
+            <input type="text" name="title">
+            <p>Content</p>
+            <input type="text" name="content"><br>
+            <input class="btn btn-success" type="submit" value="Add">
+        </form>
+        <a href="/users/{{user.id }}" class="btn btn-primary">Cancel</a>
+        
+    </div>
+</div>
+
+{% endblock %}
