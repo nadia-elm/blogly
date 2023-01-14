@@ -1,6 +1,6 @@
 from flask import Flask,request,redirect,render_template,flash
 from flask_debugtoolbar import DebugToolbarExtension
-from models import db, connect_db,User
+from models import db, connect_db,User,Post
 
 
 
@@ -18,7 +18,6 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 connect_db(app)
 db.create_all()
-
 
 @app.route('/')
 @app.route('/users')
@@ -86,6 +85,69 @@ def delete_user(user_id):
     return redirect('/users')
 
 
+
+# adding posts functionality
+@app.route('/users/<int:user_id>/posts/new', methods=['GET','POST'])
+def user_posts(user_id):
+    if request.method == 'POST':
+        user = User.query.get_or_404(user_id)
+        post = Post(title = request.form['title'], content= request.form['content'],user = user)
+        db.session.add(post)
+        db.session.commit()
+
+        flash('post created', 'success')
+    
+      
+        posts= user.posts
+        
+        return render_template('user_details.html', user = user, posts = posts)
+   
+    user = User.query.get(user_id)
+    posts= user.posts
+    return render_template('create_post.html', user = user, posts = posts)
+
+
+
+@app.route('/posts/<int:post_id>')
+def show_post(post_id):
+    post = Post.query.get(post_id)
+    user= User.query.filter_by(id= post.user_id)
+    return render_template('post.html', post=post, user = user)
+
+
+
+@app.route('/posts/<int:post_id>/delete', methods=['POST'])
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+
+    db.session.delete(post)
+    db.session.commit()
+
+    flash('post deleted', 'danger')
+
+    return redirect(f"/users/{post.user_id}")
+
+
+@app.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
+def edit_post(post_id):
+    if request.method == 'POST':
+         # get post from db
+        post = Post.query.get_or_404(post_id)
+         # update post
+        post.title = request.form['title'] 
+        post.content = request.form['content']  
+        db.session.add(post)
+        # commit to db
+        db.session.commit()
+
+        flash('post updated ', 'success')
+
+        return redirect(f"/users/{post.user_id}")
+
+    post = Post.query.get_or_404(post_id)
+    user= User.query.filter_by(id= post.user_id)
+
+    return render_template('edit_post.html',user = user, post = post)
 
 
    
