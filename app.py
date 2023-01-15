@@ -1,6 +1,6 @@
 from flask import Flask,request,redirect,render_template,flash
 from flask_debugtoolbar import DebugToolbarExtension
-from models import db, connect_db,User,Post
+from models import db, connect_db,User,Post,Tag,PostTag
 
 
 
@@ -151,4 +151,64 @@ def edit_post(post_id):
 
 
    
-   
+@app.route('/tags')
+def show_tags():
+    tags = Tag.query.all()
+    return render_template('tags.html', tags = tags)
+
+
+@app.route('/tags/new', methods=['GET', 'POST'])
+def new_tag():
+    if request.method == 'POST':
+        name = request.form['tag']
+
+        new_tag = Tag(name = name)
+        db.session.add(new_tag)
+        db.session.commit()
+        flash('tag added', 'success')
+        return redirect('/tags')
+
+    return render_template('create_tag.html')
+
+
+@app.route('/tags/<int:tag_id>')
+def tag_details(tag_id):
+    tag = Tag.query.get_or_404(tag_id)
+    return render_template('tag_details.html', tag = tag)
+
+
+
+@app.route('/tags/<int:tag_id>/delete', methods=['POST'])
+def delete_tag(tag_id) :
+    tag = Tag.query.get_or_404(tag_id)
+
+    db.session.delete(tag)
+    db.session.commit()
+
+    flash('tag deleted', 'danger')
+
+    return redirect('/tags')
+
+
+@app.route('/tags/<int:tag_id>/edit',methods=['GET', 'POST'])
+def edi_tag(tag_id):
+    if request.method == 'POST':
+        tag = Tag.query.get_or_404(tag_id)
+        tag.name = request.form['tag']
+        db.session.add(tag)
+        db.session.commit()
+        flash('tag updated ', 'success')
+        return redirect('/tags')
+
+    
+    tag = Tag.query.get_or_404(tag_id)
+    return render_template('/edit_tag.html',tag = tag)
+
+
+
+
+
+
+
+
+
