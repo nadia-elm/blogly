@@ -91,7 +91,9 @@ def delete_user(user_id):
 def user_posts(user_id):
     if request.method == 'POST':
         user = User.query.get_or_404(user_id)
-        post = Post(title = request.form['title'], content= request.form['content'],user = user)
+        tag_ids = [int(num) for num in request.form.getlist('tags')]
+        tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+        post = Post(title = request.form['title'], content= request.form['content'],user = user, tags = tags)
         db.session.add(post)
         db.session.commit()
 
@@ -104,7 +106,8 @@ def user_posts(user_id):
    
     user = User.query.get(user_id)
     posts= user.posts
-    return render_template('create_post.html', user = user, posts = posts)
+    tags = Tag.query.all()
+    return render_template('create_post.html', user = user, posts = posts, tags = tags)
 
 
 
@@ -135,7 +138,11 @@ def edit_post(post_id):
         post = Post.query.get_or_404(post_id)
          # update post
         post.title = request.form['title'] 
-        post.content = request.form['content']  
+        post.content = request.form['content']
+
+        tag_ids = [int(num) for num in request.form.getlist('tags')]
+        tags = Tag.query.filter(Tag.id.in_(tag_ids)).all() 
+         
         db.session.add(post)
         # commit to db
         db.session.commit()
@@ -146,8 +153,9 @@ def edit_post(post_id):
 
     post = Post.query.get_or_404(post_id)
     user= User.query.filter_by(id= post.user_id)
+    tags= Tag.query.all()
 
-    return render_template('edit_post.html',user = user, post = post)
+    return render_template('edit_post.html',user = user, post = post,tags =tags)
 
 
    

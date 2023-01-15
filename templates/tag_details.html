@@ -5,6 +5,16 @@
 
 <div class="container">
     <h2>{{ tag.name}}</h2>
+    
+
+    {% if tag.posts %}
+    <p>
+        <b>Posts:</b>
+        {% for post in tag.posts %}
+        <p>{{ post.title }}</p>
+        {% endfor %}
+    </p>
+    {% endif %}
 
 
 <div class="form-group row">
